@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Japan Trip Cost Calculator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 p-6">
+
+    <div class="max-w-lg mx-auto bg-white p-6 rounded-lg shadow-lg">
+        <h1 class="text-xl font-bold mb-4 text-center">Japan Trip Cost Calculator</h1>
+
+        <!-- Dropdown Selection -->
+        <label for="attraction" class="block font-semibold">Select an Attraction:</label>
+        <select id="attraction" class="w-full p-2 border rounded-lg mt-2" onchange="addAttraction()">
+            <option value="">-- Select --</option>
+        </select>
+
+        <!-- Selected Attractions List -->
+        <h2 class="text-lg font-semibold mt-4">Selected Attractions:</h2>
+        <ul id="attractions-list" class="mt-2 space-y-2"></ul>
+
+        <!-- Total Cost -->
+        <h3 class="text-lg font-bold mt-4">Total Cost: $<span id="total-cost">0</span></h3>
+    </div>
+
+    <script>
+        let selectedAttractions = [];
+        const attractionsData = [
+            { name: "Tokyo Disneyland", entranceFee: 85.15, transportCost: 20 },
+            { name: "Universal Studios Japan", entranceFee: 80, transportCost: 15 },
+            { name: "Fuji-Q Highland", entranceFee: 60, transportCost: 25 },
+            { name: "Shibuya Sky Deck", entranceFee: 15, transportCost: 21.75 },
+            { name: "Ghibli Museum", entranceFee: 15, transportCost: 10 }
+        ];
+
+        // Populate dropdown dynamically
+        function populateDropdown() {
+            const dropdown = document.getElementById("attraction");
+            attractionsData.forEach(attraction => {
+                const option = document.createElement("option");
+                option.value = `${attraction.name},${attraction.entranceFee},${attraction.transportCost}`;
+                option.textContent = `${attraction.name} - $${attraction.entranceFee}`;
+                dropdown.appendChild(option);
+            });
+        }
+
+        function addAttraction() {
+            const dropdown = document.getElementById("attraction");
+            const selectedValue = dropdown.value;
+            if (!selectedValue) return;
+
+            const [name, entranceFee, transportCost] = selectedValue.split(",");
+            const totalCost = parseFloat(entranceFee) + parseFloat(transportCost);
+
+            if (!selectedAttractions.some(attraction => attraction.name === name)) {
+                selectedAttractions.push({ name, entranceFee, transportCost, totalCost });
+                renderAttractions();
+            }
+        }
+
+        function removeAttraction(name) {
+            selectedAttractions = selectedAttractions.filter(attraction => attraction.name !== name);
+            renderAttractions();
+        }
+
+        function renderAttractions() {
+            const list = document.getElementById("attractions-list");
+            list.innerHTML = "";
+
+            selectedAttractions.forEach(attraction => {
+                const item = document.createElement("li");
+                item.classList.add("flex", "justify-between", "items-center", "p-3", "bg-gray-200", "rounded");
+
+                item.innerHTML = `
+                    <div>
+                        <span class="font-semibold">${attraction.name}</span><br>
+                        <span class="text-sm text-gray-600">Entrance: $${attraction.entranceFee} | Transport: $${attraction.transportCost}</span>
+                    </div>
+                    <button onclick="removeAttraction('${attraction.name}')" class="bg-red-500 text-white px-2 py-1 rounded">
+                        Remove
+                    </button>
+                `;
+
+                list.appendChild(item);
+            });
+
+            updateTotal();
+        }
+
+        function updateTotal() {
+            const total = selectedAttractions.reduce((sum, attr) => sum + parseFloat(attr.totalCost), 0);
+            document.getElementById("total-cost").textContent = total.toFixed(2);
+        }
+
+        // Populate dropdown on page load
+        window.onload = populateDropdown;
+    </script>
+
+</body>
+</html>
